@@ -1,10 +1,15 @@
 <?php
 
+use App\Http\Controllers\Api\V1\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Api\V1\Auth\AuthController;
 use App\Http\Controllers\Api\V1\Auth\EmailVerificationController;
 use App\Http\Controllers\Api\V1\Auth\PasswordResetController;
 use App\Http\Controllers\Api\V1\AuthenticatedUserController;
 use App\Http\Controllers\Api\V1\HealthController;
+use App\Http\Controllers\Api\V1\User\ChangePasswordController;
+use App\Http\Controllers\Api\V1\User\OrderHistoryController;
+use App\Http\Controllers\Api\V1\User\ProfileController;
+use App\Http\Controllers\Api\V1\User\ShippingAddressController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
@@ -29,4 +34,21 @@ Route::prefix('v1')->group(function () {
     });
 
     Route::middleware('auth:sanctum')->get('me', AuthenticatedUserController::class);
+
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::get('profile', [ProfileController::class, 'show']);
+        Route::put('profile', [ProfileController::class, 'update']);
+        Route::put('profile/password', ChangePasswordController::class);
+
+        Route::middleware('verified')->group(function () {
+            Route::apiResource('shipping-addresses', ShippingAddressController::class);
+            Route::get('orders', [OrderHistoryController::class, 'index']);
+            Route::get('orders/{order}', [OrderHistoryController::class, 'show']);
+        });
+
+        Route::prefix('admin')->group(function () {
+            Route::get('users', [AdminUserController::class, 'index']);
+            Route::patch('users/{user}/status', [AdminUserController::class, 'updateStatus']);
+        });
+    });
 });
