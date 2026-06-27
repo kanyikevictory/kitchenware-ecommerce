@@ -11,4 +11,14 @@ class OrderPolicy
     {
         return $user->id === $order->user_id;
     }
+
+    public function cancel(User $user, Order $order): bool
+    {
+        return $this->view($user, $order) && in_array($order->status, ['pending', 'confirmed'], true);
+    }
+
+    public function manage(User $user, ?Order $order = null): bool
+    {
+        return in_array($user->role?->slug, ['admin', 'super-admin'], true);
+    }
 }

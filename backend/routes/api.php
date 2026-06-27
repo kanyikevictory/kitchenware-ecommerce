@@ -1,8 +1,12 @@
 <?php
 
 use App\Http\Controllers\Api\V1\Admin\CategoryController as AdminCategoryController;
+use App\Http\Controllers\Api\V1\Admin\CouponController as AdminCouponController;
+use App\Http\Controllers\Api\V1\Admin\OrderController as AdminOrderController;
+use App\Http\Controllers\Api\V1\Admin\PaymentController as AdminPaymentController;
 use App\Http\Controllers\Api\V1\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Api\V1\Admin\ProductImageController as AdminProductImageController;
+use App\Http\Controllers\Api\V1\Admin\ReviewController as AdminReviewController;
 use App\Http\Controllers\Api\V1\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Api\V1\Auth\AuthController;
 use App\Http\Controllers\Api\V1\Auth\EmailVerificationController;
@@ -11,12 +15,20 @@ use App\Http\Controllers\Api\V1\AuthenticatedUserController;
 use App\Http\Controllers\Api\V1\CartController;
 use App\Http\Controllers\Api\V1\CartItemController;
 use App\Http\Controllers\Api\V1\CategoryController;
+use App\Http\Controllers\Api\V1\CheckoutController;
+use App\Http\Controllers\Api\V1\CouponController;
 use App\Http\Controllers\Api\V1\HealthController;
+use App\Http\Controllers\Api\V1\PaymentController;
 use App\Http\Controllers\Api\V1\ProductController;
+use App\Http\Controllers\Api\V1\ProductReviewController;
+use App\Http\Controllers\Api\V1\ReviewController;
 use App\Http\Controllers\Api\V1\User\ChangePasswordController;
 use App\Http\Controllers\Api\V1\User\OrderHistoryController;
+use App\Http\Controllers\Api\V1\User\OrderStatusController;
 use App\Http\Controllers\Api\V1\User\ProfileController;
 use App\Http\Controllers\Api\V1\User\ShippingAddressController;
+use App\Http\Controllers\Api\V1\WishlistController;
+use App\Http\Controllers\Api\V1\WishlistItemController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
@@ -25,6 +37,7 @@ Route::prefix('v1')->group(function () {
     Route::get('categories/{category:slug}', [CategoryController::class, 'show']);
     Route::get('products', [ProductController::class, 'index']);
     Route::get('products/{product:slug}', [ProductController::class, 'show']);
+    Route::get('products/{product:slug}/reviews', [ProductReviewController::class, 'index']);
 
     Route::prefix('auth')->group(function () {
         Route::post('register', [AuthController::class, 'register'])->middleware('throttle:6,1');
@@ -58,9 +71,23 @@ Route::prefix('v1')->group(function () {
             Route::patch('cart/items/{cartItem}', [CartItemController::class, 'update']);
             Route::delete('cart/items/{cartItem}', [CartItemController::class, 'destroy']);
 
+            Route::get('wishlist', [WishlistController::class, 'show']);
+            Route::post('wishlist/items', [WishlistItemController::class, 'store']);
+            Route::delete('wishlist/items/{wishlistItem}', [WishlistItemController::class, 'destroy']);
+
+            Route::post('checkout', CheckoutController::class);
+            Route::post('coupons/validate', [CouponController::class, 'validateCoupon']);
+
             Route::apiResource('shipping-addresses', ShippingAddressController::class);
             Route::get('orders', [OrderHistoryController::class, 'index']);
             Route::get('orders/{order}', [OrderHistoryController::class, 'show']);
+            Route::post('orders/{order}/cancel', [OrderStatusController::class, 'cancel']);
+            Route::get('orders/{order}/payments', [PaymentController::class, 'index']);
+            Route::post('orders/{order}/payments', [PaymentController::class, 'store']);
+
+            Route::post('products/{product}/reviews', [ReviewController::class, 'store']);
+            Route::put('reviews/{review}', [ReviewController::class, 'update']);
+            Route::delete('reviews/{review}', [ReviewController::class, 'destroy']);
         });
 
         Route::prefix('admin')->group(function () {
@@ -70,6 +97,13 @@ Route::prefix('v1')->group(function () {
             Route::apiResource('products', AdminProductController::class);
             Route::delete('products/{product}/images/{image}', [AdminProductImageController::class, 'destroy']);
             Route::patch('products/{product}/images/{image}/primary', [AdminProductImageController::class, 'primary']);
+            Route::get('orders', [AdminOrderController::class, 'index']);
+            Route::get('orders/{order}', [AdminOrderController::class, 'show']);
+            Route::patch('orders/{order}/status', [AdminOrderController::class, 'updateStatus']);
+            Route::patch('payments/{payment}/cash-on-delivery', [AdminPaymentController::class, 'updateStatus']);
+            Route::get('reviews', [AdminReviewController::class, 'index']);
+            Route::patch('reviews/{review}/moderation', [AdminReviewController::class, 'moderate']);
+            Route::apiResource('coupons', AdminCouponController::class);
         });
     });
 });
