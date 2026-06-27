@@ -8,6 +8,8 @@ use App\Http\Controllers\Api\V1\Auth\AuthController;
 use App\Http\Controllers\Api\V1\Auth\EmailVerificationController;
 use App\Http\Controllers\Api\V1\Auth\PasswordResetController;
 use App\Http\Controllers\Api\V1\AuthenticatedUserController;
+use App\Http\Controllers\Api\V1\CartController;
+use App\Http\Controllers\Api\V1\CartItemController;
 use App\Http\Controllers\Api\V1\CategoryController;
 use App\Http\Controllers\Api\V1\HealthController;
 use App\Http\Controllers\Api\V1\ProductController;
@@ -50,6 +52,12 @@ Route::prefix('v1')->group(function () {
         Route::put('profile/password', ChangePasswordController::class);
 
         Route::middleware('verified')->group(function () {
+            Route::get('cart', [CartController::class, 'show']);
+            Route::delete('cart', [CartController::class, 'destroy']);
+            Route::post('cart/items', [CartItemController::class, 'store']);
+            Route::patch('cart/items/{cartItem}', [CartItemController::class, 'update']);
+            Route::delete('cart/items/{cartItem}', [CartItemController::class, 'destroy']);
+
             Route::apiResource('shipping-addresses', ShippingAddressController::class);
             Route::get('orders', [OrderHistoryController::class, 'index']);
             Route::get('orders/{order}', [OrderHistoryController::class, 'show']);
