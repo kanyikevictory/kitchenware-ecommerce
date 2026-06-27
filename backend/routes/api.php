@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Api\V1\Admin\CategoryController as AdminCategoryController;
+use App\Http\Controllers\Api\V1\Admin\ProductController as AdminProductController;
+use App\Http\Controllers\Api\V1\Admin\ProductImageController as AdminProductImageController;
 use App\Http\Controllers\Api\V1\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Api\V1\Auth\AuthController;
 use App\Http\Controllers\Api\V1\Auth\EmailVerificationController;
@@ -8,6 +10,7 @@ use App\Http\Controllers\Api\V1\Auth\PasswordResetController;
 use App\Http\Controllers\Api\V1\AuthenticatedUserController;
 use App\Http\Controllers\Api\V1\CategoryController;
 use App\Http\Controllers\Api\V1\HealthController;
+use App\Http\Controllers\Api\V1\ProductController;
 use App\Http\Controllers\Api\V1\User\ChangePasswordController;
 use App\Http\Controllers\Api\V1\User\OrderHistoryController;
 use App\Http\Controllers\Api\V1\User\ProfileController;
@@ -18,6 +21,8 @@ Route::prefix('v1')->group(function () {
     Route::get('health', HealthController::class);
     Route::get('categories', [CategoryController::class, 'index']);
     Route::get('categories/{category:slug}', [CategoryController::class, 'show']);
+    Route::get('products', [ProductController::class, 'index']);
+    Route::get('products/{product:slug}', [ProductController::class, 'show']);
 
     Route::prefix('auth')->group(function () {
         Route::post('register', [AuthController::class, 'register'])->middleware('throttle:6,1');
@@ -54,6 +59,9 @@ Route::prefix('v1')->group(function () {
             Route::get('users', [AdminUserController::class, 'index']);
             Route::patch('users/{user}/status', [AdminUserController::class, 'updateStatus']);
             Route::apiResource('categories', AdminCategoryController::class);
+            Route::apiResource('products', AdminProductController::class);
+            Route::delete('products/{product}/images/{image}', [AdminProductImageController::class, 'destroy']);
+            Route::patch('products/{product}/images/{image}/primary', [AdminProductImageController::class, 'primary']);
         });
     });
 });
