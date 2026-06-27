@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\User;
+use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -19,6 +21,13 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        ResetPassword::createUrlUsing(
+            fn (User $user, string $token): string => sprintf(
+                '%s/reset-password?token=%s&email=%s',
+                rtrim((string) config('app.frontend_url'), '/'),
+                urlencode($token),
+                urlencode($user->getEmailForPasswordReset()),
+            ),
+        );
     }
 }

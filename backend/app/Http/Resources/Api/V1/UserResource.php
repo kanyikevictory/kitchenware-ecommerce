@@ -2,11 +2,12 @@
 
 namespace App\Http\Resources\Api\V1;
 
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * @mixin \App\Models\User
+ * @mixin User
  */
 class UserResource extends JsonResource
 {
@@ -21,6 +22,13 @@ class UserResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'email' => $this->email,
+            'phone' => $this->phone,
+            'status' => $this->status,
+            'role' => $this->whenLoaded('role', fn (): array => [
+                'id' => $this->role->id,
+                'name' => $this->role->name,
+                'slug' => $this->role->slug,
+            ]),
             'email_verified_at' => $this->email_verified_at,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
