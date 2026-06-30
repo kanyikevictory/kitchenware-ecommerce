@@ -9,26 +9,21 @@ class CategoryPolicy
 {
     public function viewAnyAdmin(User $user): bool
     {
-        return $this->isAdministrator($user);
+        return $user->hasPermission('categories.manage');
     }
 
     public function create(User $user): bool
     {
-        return $this->isAdministrator($user);
+        return $user->hasPermission('categories.manage');
     }
 
     public function update(User $user, Category $category): bool
     {
-        return $this->isAdministrator($user);
+        return $user->hasPermission('categories.manage');
     }
 
     public function delete(User $user, Category $category): bool
     {
-        return $this->isAdministrator($user);
-    }
-
-    private function isAdministrator(User $user): bool
-    {
-        return in_array($user->role?->slug, ['admin', 'super-admin'], true);
+        return $user->hasPermission('categories.manage');
     }
 }

@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Events\OrderPlaced;
+use App\Events\OrderStatusChanged;
 use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\Order;
@@ -20,7 +22,7 @@ class OrderService
 
     public function checkout(User $user, int $shippingAddressId, ?string $notes, ?string $couponCode = null): Order
     {
-        return DB::transaction(function () use ($user, $shippingAddressId, $notes, $couponCode): Order {
+        $order = DB::transaction(function () use ($user, $shippingAddressId, $notes, $couponCode): Order {
             $address = ShippingAddress::query()
                 ->where('user_id', $user->id)
                 ->find($shippingAddressId);
@@ -119,6 +121,10 @@ class OrderService
 
             return $order->load(['items', 'coupon']);
         });
+
+        event(new OrderPlaced($order));
+
+        return $order;
     }
 
     public function cancel(Order $order): Order
@@ -169,8 +175,9 @@ class OrderService
 
     private function transition(Order $order, string $status, bool $customerCancellation = false): Order
     {
-        return DB::transaction(function () use ($order, $status, $customerCancellation): Order {
+        [$updatedOrder, $previousStatus] = DB::transaction(function () use ($order, $status, $customerCancellation): array {
             $lockedOrder = Order::query()->lockForUpdate()->findOrFail($order->id);
+            $previousStatus = $lockedOrder->status;
             $allowed = [
                 'pending' => ['confirmed', 'cancelled'],
                 'confirmed' => ['processing', 'cancelled'],
@@ -193,8 +200,12 @@ class OrderService
 
             $lockedOrder->update(['status' => $status]);
 
-            return $lockedOrder->load(['items', 'user:id,name,email']);
+            return [$lockedOrder->load(['items', 'user:id,name,email']), $previousStatus];
         });
+
+        event(new OrderStatusChanged($updatedOrder, $previousStatus, $status));
+
+        return $updatedOrder;
     }
 
     private function restoreStock(Order $order): void

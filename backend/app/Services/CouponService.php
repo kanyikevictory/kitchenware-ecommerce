@@ -40,7 +40,7 @@ class CouponService
         }
 
         if ($eligibleAmountCents < $this->toCents((string) $coupon->minimum_order_amount)) {
-            throw $this->invalid('The order does not meet this coupon’s minimum amount.');
+            throw $this->invalid("The order does not meet this coupon's minimum amount.");
         }
 
         $discountCents = $coupon->type === 'percentage'

@@ -9,6 +9,6 @@ class ProductPolicy
 {
     public function manage(User $user, ?Product $product = null): bool
     {
-        return in_array($user->role?->slug, ['admin', 'super-admin'], true);
+        return $user->hasPermission('products.manage');
     }
 }

@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Notifications\Auth\ResetPasswordNotification;
+use App\Notifications\Auth\VerifyEmailNotification;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail as MustVerifyEmailContract;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -33,6 +35,30 @@ class User extends Authenticatable implements MustVerifyEmailContract
             'password' => 'hashed',
             'last_login_at' => 'datetime',
         ];
+    }
+
+    public function sendEmailVerificationNotification(): void
+    {
+        $this->notify(new VerifyEmailNotification);
+    }
+
+    public function sendPasswordResetNotification($token): void
+    {
+        $this->notify(new ResetPasswordNotification($token));
+    }
+
+    public function hasRole(string ...$roles): bool
+    {
+        return in_array($this->role?->slug, $roles, true);
+    }
+
+    public function hasPermission(string $permission): bool
+    {
+        if ($this->hasRole('super-admin')) {
+            return true;
+        }
+
+        return $this->role?->permissions()->where('slug', $permission)->exists() ?? false;
     }
 
     public function role(): BelongsTo

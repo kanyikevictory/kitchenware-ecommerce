@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\Coupon\ValidateCouponRequest;
 use App\Models\Cart;
+use App\Models\CartItem;
 use App\Services\CouponService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\ValidationException;
@@ -17,7 +18,7 @@ class CouponController extends Controller
     {
         $cart = Cart::query()->where('user_id', $request->user()->id)->first();
 
-        if (! $cart || ! $cart->items()->exists()) {
+        if (! $cart || ! CartItem::query()->where('cart_id', $cart->id)->exists()) {
             throw ValidationException::withMessages(['cart' => ['Your cart is empty.']]);
         }
 

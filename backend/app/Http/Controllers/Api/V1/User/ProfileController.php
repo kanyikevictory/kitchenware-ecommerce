@@ -12,7 +12,7 @@ class ProfileController extends Controller
 {
     public function show(Request $request): JsonResponse
     {
-        return response()->json(['data' => new UserResource($request->user()->load('role'))]);
+        return response()->json(['data' => new UserResource($request->user()->load('role.permissions'))]);
     }
 
     public function update(UpdateProfileRequest $request): JsonResponse
@@ -33,7 +33,7 @@ class ProfileController extends Controller
 
         return response()->json([
             'message' => $emailChanged ? 'Profile updated. Please verify your new email address.' : 'Profile updated successfully.',
-            'data' => new UserResource($user->load('role')),
+            'data' => new UserResource($user->load('role.permissions')),
         ]);
     }
 }

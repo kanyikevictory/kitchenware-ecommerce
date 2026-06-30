@@ -14,6 +14,6 @@ class PaymentPolicy
 
     public function manage(User $user, ?Payment $payment = null): bool
     {
-        return in_array($user->role?->slug, ['admin', 'super-admin'], true);
+        return $user->hasPermission('payments.manage');
     }
 }

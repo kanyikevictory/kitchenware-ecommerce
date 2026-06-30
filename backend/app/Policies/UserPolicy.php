@@ -8,7 +8,12 @@ class UserPolicy
 {
     public function viewAny(User $user): bool
     {
-        return in_array($user->role?->slug, ['admin', 'super-admin'], true);
+        return $user->hasPermission('users.view');
+    }
+
+    public function viewDashboard(User $user): bool
+    {
+        return $user->hasPermission('dashboard.view');
     }
 
     public function updateStatus(User $user, User $target): bool
@@ -21,6 +26,6 @@ class UserPolicy
             return true;
         }
 
-        return $user->role?->slug === 'admin' && $target->role?->slug === 'customer';
+        return $user->hasPermission('users.update-status') && $target->hasRole('customer');
     }
 }

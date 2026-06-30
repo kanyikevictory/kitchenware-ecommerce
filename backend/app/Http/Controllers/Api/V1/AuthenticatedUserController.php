@@ -14,7 +14,7 @@ class AuthenticatedUserController
     public function __invoke(Request $request): JsonResponse
     {
         return response()->json([
-            'data' => new UserResource($request->user()),
+            'data' => new UserResource($request->user()->load('role.permissions')),
         ]);
     }
 }

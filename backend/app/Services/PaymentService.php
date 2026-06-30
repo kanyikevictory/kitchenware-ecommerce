@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Events\PaymentCompleted;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Payments\Contracts\PaymentMethodHandler;
@@ -56,7 +57,7 @@ class PaymentService
 
     public function updateCashOnDeliveryStatus(Payment $payment, string $status): Payment
     {
-        return DB::transaction(function () use ($payment, $status): Payment {
+        $updatedPayment = DB::transaction(function () use ($payment, $status): Payment {
             $lockedPayment = Payment::query()->lockForUpdate()->findOrFail($payment->id);
             $order = Order::query()->lockForUpdate()->findOrFail($lockedPayment->order_id);
 
@@ -87,6 +88,12 @@ class PaymentService
 
             return $lockedPayment->refresh();
         });
+
+        if ($updatedPayment->status === 'completed') {
+            event(new PaymentCompleted($updatedPayment));
+        }
+
+        return $updatedPayment;
     }
 
     private function handler(string $method): PaymentMethodHandler

@@ -9,6 +9,6 @@ class CouponPolicy
 {
     public function manage(User $user, ?Coupon $coupon = null): bool
     {
-        return in_array($user->role?->slug, ['admin', 'super-admin'], true);
+        return $user->hasPermission('coupons.manage');
     }
 }

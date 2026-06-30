@@ -19,6 +19,6 @@ class ReviewPolicy
 
     public function manage(User $user, ?Review $review = null): bool
     {
-        return in_array($user->role?->slug, ['admin', 'super-admin'], true);
+        return $user->hasPermission('reviews.manage');
     }
 }

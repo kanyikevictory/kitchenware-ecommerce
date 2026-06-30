@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\V1\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Api\V1\Admin\CouponController as AdminCouponController;
+use App\Http\Controllers\Api\V1\Admin\DashboardController;
 use App\Http\Controllers\Api\V1\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Api\V1\Admin\PaymentController as AdminPaymentController;
 use App\Http\Controllers\Api\V1\Admin\ProductController as AdminProductController;
@@ -22,6 +23,7 @@ use App\Http\Controllers\Api\V1\PaymentController;
 use App\Http\Controllers\Api\V1\ProductController;
 use App\Http\Controllers\Api\V1\ProductReviewController;
 use App\Http\Controllers\Api\V1\ReviewController;
+use App\Http\Controllers\Api\V1\SearchController;
 use App\Http\Controllers\Api\V1\User\ChangePasswordController;
 use App\Http\Controllers\Api\V1\User\OrderHistoryController;
 use App\Http\Controllers\Api\V1\User\OrderStatusController;
@@ -33,6 +35,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
     Route::get('health', HealthController::class);
+    Route::get('search', SearchController::class)->middleware('throttle:60,1');
     Route::get('categories', [CategoryController::class, 'index']);
     Route::get('categories/{category:slug}', [CategoryController::class, 'show']);
     Route::get('products', [ProductController::class, 'index']);
@@ -90,7 +93,8 @@ Route::prefix('v1')->group(function () {
             Route::delete('reviews/{review}', [ReviewController::class, 'destroy']);
         });
 
-        Route::prefix('admin')->group(function () {
+        Route::prefix('admin')->middleware('permission:admin.access')->group(function () {
+            Route::get('dashboard', DashboardController::class);
             Route::get('users', [AdminUserController::class, 'index']);
             Route::patch('users/{user}/status', [AdminUserController::class, 'updateStatus']);
             Route::apiResource('categories', AdminCategoryController::class);

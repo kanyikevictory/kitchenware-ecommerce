@@ -7,7 +7,7 @@ use App\Models\OrderItem;
 use App\Models\Role;
 use App\Models\ShippingAddress;
 use App\Models\User;
-use Illuminate\Auth\Notifications\VerifyEmail;
+use App\Notifications\Auth\VerifyEmailNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
@@ -35,7 +35,7 @@ class UserModuleTest extends TestCase
         $user->refresh();
         $this->assertSame('Updated Customer', $user->name);
         $this->assertNull($user->email_verified_at);
-        Notification::assertSentTo($user, VerifyEmail::class);
+        Notification::assertSentTo($user, VerifyEmailNotification::class);
     }
 
     public function test_user_can_change_password_and_other_tokens_are_revoked(): void

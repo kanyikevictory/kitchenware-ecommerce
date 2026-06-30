@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -17,11 +18,12 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             RoleSeeder::class,
+            PermissionSeeder::class,
             CategorySeeder::class,
         ]);
 
-        $superAdminRole = \App\Models\Role::query()->where('slug', 'super-admin')->firstOrFail();
-        $customerRole = \App\Models\Role::query()->where('slug', 'customer')->firstOrFail();
+        $superAdminRole = Role::query()->where('slug', 'super-admin')->firstOrFail();
+        $customerRole = Role::query()->where('slug', 'customer')->firstOrFail();
 
         User::factory()->create([
             'role_id' => $superAdminRole->id,

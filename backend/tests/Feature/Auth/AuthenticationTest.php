@@ -4,8 +4,8 @@ namespace Tests\Feature\Auth;
 
 use App\Models\Role;
 use App\Models\User;
-use Illuminate\Auth\Notifications\ResetPassword;
-use Illuminate\Auth\Notifications\VerifyEmail;
+use App\Notifications\Auth\ResetPasswordNotification;
+use App\Notifications\Auth\VerifyEmailNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
@@ -41,7 +41,7 @@ class AuthenticationTest extends TestCase
         $this->assertNotNull($user->cart);
         $this->assertNotNull($user->wishlist);
         $this->assertCount(1, $user->tokens);
-        Notification::assertSentTo($user, VerifyEmail::class);
+        Notification::assertSentTo($user, VerifyEmailNotification::class);
     }
 
     public function test_active_user_can_login_and_logout_current_token(): void
@@ -100,7 +100,7 @@ class AuthenticationTest extends TestCase
         $this->postJson('/api/v1/auth/forgot-password', ['email' => $user->email])->assertOk();
         $this->postJson('/api/v1/auth/forgot-password', ['email' => 'missing@example.com'])->assertOk();
 
-        Notification::assertSentTo($user, ResetPassword::class);
+        Notification::assertSentTo($user, ResetPasswordNotification::class);
     }
 
     public function test_user_can_reset_password_and_existing_tokens_are_revoked(): void

@@ -19,6 +19,6 @@ class OrderPolicy
 
     public function manage(User $user, ?Order $order = null): bool
     {
-        return in_array($user->role?->slug, ['admin', 'super-admin'], true);
+        return $user->hasPermission('orders.manage');
     }
 }

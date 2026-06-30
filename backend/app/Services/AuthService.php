@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Events\UserRegistered;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Auth\AuthenticationException;
@@ -14,7 +15,7 @@ class AuthService
 {
     public function register(array $attributes): array
     {
-        return DB::transaction(function () use ($attributes): array {
+        $payload = DB::transaction(function () use ($attributes): array {
             $role = Role::query()->where('slug', 'customer')->first();
 
             if (! $role) {
@@ -29,10 +30,13 @@ class AuthService
 
             $user->cart()->create();
             $user->wishlist()->create();
-            $user->sendEmailVerificationNotification();
 
             return $this->authenticationPayload($user, $attributes['device_name']);
         });
+
+        event(new UserRegistered($payload['user']));
+
+        return $payload;
     }
 
     public function login(array $credentials): array
@@ -55,7 +59,7 @@ class AuthService
     private function authenticationPayload(User $user, string $deviceName): array
     {
         return [
-            'user' => $user->load('role'),
+            'user' => $user->load('role.permissions'),
             'token' => $user->createToken($deviceName)->plainTextToken,
         ];
     }
