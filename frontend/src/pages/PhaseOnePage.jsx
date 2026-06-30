@@ -1,0 +1,9 @@
+import { ArrowRight, ShieldCheck, Sparkles, Truck } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { Badge, Card } from '../components/common/Surface'
+
+const qualities = [{ icon: Sparkles, title: 'Considered design', text: 'Timeless pieces selected for form and everyday function.' }, { icon: ShieldCheck, title: 'Quality assured', text: 'Durable materials from trusted kitchenware makers.' }, { icon: Truck, title: 'Delivered with care', text: 'Securely packed and delivered throughout Uganda.' }]
+
+export default function PhaseOnePage() {
+  return <><section className="relative isolate overflow-hidden bg-ice-50 px-4 py-20 sm:px-6 lg:px-8 lg:py-28"><div className="absolute inset-y-0 right-0 -z-10 w-1/2 bg-linear-to-l from-cool-gray-200/45 to-transparent" /><div className="mx-auto max-w-7xl"><Badge tone="gold">Phase 2 · Shared experience</Badge><h1 className="mt-6 max-w-4xl font-display text-5xl leading-[0.95] font-semibold text-navy-950 sm:text-7xl lg:text-8xl">Elevated essentials for the heart of your home.</h1><p className="mt-7 max-w-xl text-base leading-7 text-charcoal-900/65 sm:text-lg">Our storefront shell and reusable design system are ready. The full editorial homepage experience arrives next.</p><Link to="/shop" className="mt-9 inline-flex items-center gap-2 rounded-md bg-navy-950 px-6 py-3.5 text-sm font-bold text-white transition hover:bg-navy-900">Browse the future shop <ArrowRight className="size-4" /></Link></div></section><section className="mx-auto grid max-w-7xl gap-5 px-4 py-16 sm:px-6 md:grid-cols-3 lg:px-8">{qualities.map(({ icon: Icon, title, text }) => <Card key={title} className="p-7"><Icon className="size-7 text-gold-600" /><h2 className="mt-5 font-display text-2xl font-semibold text-navy-950">{title}</h2><p className="mt-2 text-sm leading-6 text-charcoal-900/65">{text}</p></Card>)}</section></>
+}

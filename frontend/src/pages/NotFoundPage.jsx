@@ -1,12 +1,30 @@
-import { Link } from 'react-router-dom';
+import { Link, useRouteError } from 'react-router-dom'
 
 export default function NotFoundPage() {
+  const routeError = useRouteError()
+  const isUnexpectedError = routeError && routeError.status !== 404
+
   return (
-    <main className="mx-auto flex min-h-[65vh] max-w-3xl flex-col items-center justify-center px-6 text-center">
-      <p className="font-sans text-sm uppercase tracking-[0.3em] text-navy">404</p>
-      <h1 className="mt-4 font-serif text-5xl text-navy">This shelf is empty.</h1>
-      <p className="mt-5 max-w-lg text-charcoal/70">The page you were looking for may have moved, but the kitchen is still open.</p>
-      <Link to="/shop" className="mt-8 rounded-full bg-terracotta px-7 py-3 font-medium text-white">Browse the collection</Link>
+    <main className="grid min-h-screen place-items-center bg-ice-50 px-6 text-center">
+      <div>
+        <p className="text-sm font-bold uppercase tracking-[0.24em] text-gold-600">
+          {isUnexpectedError ? 'Something went wrong' : '404 · Page not found'}
+        </p>
+        <h1 className="mt-4 font-display text-5xl font-semibold text-navy-950">
+          {isUnexpectedError ? 'That did not go to plan.' : 'This shelf is empty.'}
+        </h1>
+        <p className="mx-auto mt-4 max-w-md leading-7 text-charcoal-900/70">
+          {isUnexpectedError
+            ? 'Please return home and try again.'
+            : 'The page may have moved, or it belongs to a later build phase.'}
+        </p>
+        <Link
+          to="/"
+          className="mt-8 inline-flex rounded-md bg-navy-950 px-6 py-3 text-sm font-bold text-white transition hover:bg-navy-900"
+        >
+          Return home
+        </Link>
+      </div>
     </main>
-  );
+  )
 }
