@@ -16,6 +16,7 @@ class PaymentService
     public function __construct(
         private readonly CashOnDeliveryPaymentMethod $cashOnDelivery,
         private readonly MobileMoneyPaymentMethod $mobileMoney,
+        private readonly CacheVersionService $cache,
     ) {}
 
     public function initiate(Order $order, string $method, array $context): Payment
@@ -91,6 +92,7 @@ class PaymentService
 
         if ($updatedPayment->status === 'completed') {
             event(new PaymentCompleted($updatedPayment));
+            $this->cache->bump('dashboard');
         }
 
         return $updatedPayment;

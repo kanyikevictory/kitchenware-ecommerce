@@ -33,7 +33,7 @@ use App\Http\Controllers\Api\V1\WishlistController;
 use App\Http\Controllers\Api\V1\WishlistItemController;
 use Illuminate\Support\Facades\Route;
 
-Route::prefix('v1')->group(function () {
+Route::prefix('v1')->middleware('throttle:api')->group(function () {
     Route::get('health', HealthController::class);
     Route::get('search', SearchController::class)->middleware('throttle:60,1');
     Route::get('categories', [CategoryController::class, 'index']);
@@ -78,7 +78,7 @@ Route::prefix('v1')->group(function () {
             Route::post('wishlist/items', [WishlistItemController::class, 'store']);
             Route::delete('wishlist/items/{wishlistItem}', [WishlistItemController::class, 'destroy']);
 
-            Route::post('checkout', CheckoutController::class);
+            Route::post('checkout', CheckoutController::class)->middleware('throttle:checkout');
             Route::post('coupons/validate', [CouponController::class, 'validateCoupon']);
 
             Route::apiResource('shipping-addresses', ShippingAddressController::class);
@@ -93,7 +93,7 @@ Route::prefix('v1')->group(function () {
             Route::delete('reviews/{review}', [ReviewController::class, 'destroy']);
         });
 
-        Route::prefix('admin')->middleware('permission:admin.access')->group(function () {
+        Route::prefix('admin')->middleware(['permission:admin.access', 'throttle:admin'])->group(function () {
             Route::get('dashboard', DashboardController::class);
             Route::get('users', [AdminUserController::class, 'index']);
             Route::patch('users/{user}/status', [AdminUserController::class, 'updateStatus']);

@@ -18,7 +18,10 @@ use Illuminate\Validation\ValidationException;
 
 class OrderService
 {
-    public function __construct(private readonly CouponService $couponService) {}
+    public function __construct(
+        private readonly CouponService $couponService,
+        private readonly CacheVersionService $cache,
+    ) {}
 
     public function checkout(User $user, int $shippingAddressId, ?string $notes, ?string $couponCode = null): Order
     {
@@ -123,6 +126,7 @@ class OrderService
         });
 
         event(new OrderPlaced($order));
+        $this->cache->bump('dashboard');
 
         return $order;
     }
@@ -204,6 +208,7 @@ class OrderService
         });
 
         event(new OrderStatusChanged($updatedOrder, $previousStatus, $status));
+        $this->cache->bump('dashboard');
 
         return $updatedOrder;
     }

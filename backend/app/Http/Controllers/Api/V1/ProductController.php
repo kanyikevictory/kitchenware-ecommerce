@@ -48,11 +48,13 @@ class ProductController extends Controller
 
     public function show(Product $product): ProductResource
     {
-        abort_unless($product->status === 'active' && $product->category()->where('is_active', true)->exists(), 404);
-
-        return new ProductResource($product->load([
-            'category:id,name,slug',
+        $product->load([
+            'category:id,name,slug,is_active',
             'images' => fn ($query) => $query->orderByDesc('is_primary')->orderBy('sort_order'),
-        ]));
+        ]);
+
+        abort_unless($product->status === 'active' && $product->category?->is_active, 404);
+
+        return new ProductResource($product);
     }
 }

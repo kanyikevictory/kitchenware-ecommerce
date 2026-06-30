@@ -13,16 +13,22 @@ use Throwable;
 
 class CategoryService
 {
+    public function __construct(private readonly CacheVersionService $cache) {}
+
     public function create(array $attributes, ?UploadedFile $image): Category
     {
         $imagePath = $image?->store('categories', 'public');
 
         try {
-            return DB::transaction(fn (): Category => Category::query()->create([
+            $category = DB::transaction(fn (): Category => Category::query()->create([
                 ...Arr::except($attributes, ['image']),
                 'slug' => $this->uniqueSlug($attributes['name']),
                 'image_path' => $imagePath,
             ]));
+
+            $this->cache->bump('dashboard');
+
+            return $category;
         } catch (Throwable $exception) {
             if ($imagePath) {
                 Storage::disk('public')->delete($imagePath);
@@ -63,6 +69,8 @@ class CategoryService
             Storage::disk('public')->delete($oldImagePath);
         }
 
+        $this->cache->bump('dashboard');
+
         return $category->refresh();
     }
 
@@ -75,6 +83,7 @@ class CategoryService
         }
 
         $category->delete();
+        $this->cache->bump('dashboard');
     }
 
     private function uniqueSlug(string $name, ?Category $ignore = null): string

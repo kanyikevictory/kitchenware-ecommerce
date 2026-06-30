@@ -58,7 +58,13 @@ class User extends Authenticatable implements MustVerifyEmailContract
             return true;
         }
 
-        return $this->role?->permissions()->where('slug', $permission)->exists() ?? false;
+        if (! $this->relationLoaded('role')) {
+            $this->load('role.permissions');
+        } elseif ($this->role && ! $this->role->relationLoaded('permissions')) {
+            $this->role->load('permissions');
+        }
+
+        return $this->role?->permissions->contains('slug', $permission) ?? false;
     }
 
     public function role(): BelongsTo

@@ -41,6 +41,7 @@ class AuthorizationModuleTest extends TestCase
         $this->getJson('/api/v1/admin/dashboard')->assertForbidden();
 
         $admin->role->permissions()->attach($dashboardPermission);
+        $admin->unsetRelation('role');
         $this->getJson('/api/v1/admin/dashboard')->assertOk();
     }
 

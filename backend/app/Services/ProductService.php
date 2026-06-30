@@ -14,7 +14,10 @@ use Throwable;
 
 class ProductService
 {
-    public function __construct(private readonly ProductImageService $imageService) {}
+    public function __construct(
+        private readonly ProductImageService $imageService,
+        private readonly CacheVersionService $cache,
+    ) {}
 
     /** @param array<int, UploadedFile> $images */
     public function create(array $attributes, array $images): Product
@@ -22,7 +25,7 @@ class ProductService
         $paths = $this->storeImages($images);
 
         try {
-            return DB::transaction(function () use ($attributes, $paths): Product {
+            $product = DB::transaction(function () use ($attributes, $paths): Product {
                 $product = Product::query()->create([
                     ...Arr::except($attributes, ['images']),
                     'slug' => $this->uniqueSlug($attributes['name']),
@@ -32,6 +35,10 @@ class ProductService
 
                 return $product;
             });
+
+            $this->cache->bump('dashboard');
+
+            return $product;
         } catch (Throwable $exception) {
             Storage::disk('public')->delete($paths);
             throw $exception;
@@ -63,6 +70,8 @@ class ProductService
             throw $exception;
         }
 
+        $this->cache->bump('dashboard');
+
         return $product->refresh();
     }
 
@@ -72,6 +81,8 @@ class ProductService
             $product->images()->delete();
             $product->delete();
         });
+
+        $this->cache->bump('dashboard');
     }
 
     public function deleteImage(Product $product, ProductImage $image): void

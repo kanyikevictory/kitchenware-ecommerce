@@ -12,7 +12,19 @@ use Illuminate\Support\Facades\DB;
 
 class DashboardService
 {
+    public function __construct(private readonly CacheVersionService $cache) {}
+
     public function metrics(int $year): array
+    {
+        return $this->cache->remember(
+            'dashboard',
+            "metrics:{$year}",
+            (int) config('performance.dashboard_cache_seconds', 60),
+            fn (): array => $this->buildMetrics($year),
+        );
+    }
+
+    private function buildMetrics(int $year): array
     {
         return [
             'summary' => $this->summary(),

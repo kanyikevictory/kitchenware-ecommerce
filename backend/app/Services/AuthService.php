@@ -13,6 +13,8 @@ use RuntimeException;
 
 class AuthService
 {
+    public function __construct(private readonly CacheVersionService $cache) {}
+
     public function register(array $attributes): array
     {
         $payload = DB::transaction(function () use ($attributes): array {
@@ -35,6 +37,7 @@ class AuthService
         });
 
         event(new UserRegistered($payload['user']));
+        $this->cache->bump('dashboard');
 
         return $payload;
     }
